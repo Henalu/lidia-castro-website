@@ -35,7 +35,7 @@ function formatDate(date: string) {
     month: "long",
     year: "numeric",
     timeZone: "Europe/Madrid",
-  }).format(new Date(`${date}T12:00:00+02:00`));
+  }).format(new Date(`${date}T12:00:00.000Z`));
 }
 
 function bookingSummary(booking: BookingPayload) {
@@ -59,9 +59,9 @@ function buildMessages(payload: NotificationPayload): EmailMessage[] {
     return [
       {
         to: payload.adminEmail,
-        subject: `Nueva solicitud de reserva: ${summary}`,
+        subject: `Nueva solicitud de cita: ${summary}`,
         text: [
-          "Ha entrado una nueva solicitud de reserva.",
+          "Se ha recibido una nueva solicitud de cita.",
           `Paciente: ${payload.recipientName}`,
           `Fecha: ${summary}`,
           `Motivo: ${payload.booking.reason || "Sin detalle adicional."}`,
@@ -69,8 +69,8 @@ function buildMessages(payload: NotificationPayload): EmailMessage[] {
         html: `
           <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1f1d1b;">
             <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#7b746f;">Lidia Castro Fisioterapia</p>
-            <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Nueva solicitud de reserva</h1>
-            <p style="font-size:16px;line-height:1.7;">${escapeHtml(payload.recipientName)} ha enviado una solicitud para <strong>${escapeHtml(summary)}</strong>.</p>
+            <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Nueva solicitud de cita</h1>
+            <p style="font-size:16px;line-height:1.7;">${escapeHtml(payload.recipientName)} ha solicitado cita para <strong>${escapeHtml(summary)}</strong>.</p>
             <div style="margin-top:20px;padding:18px;border:1px solid #e4ddd6;border-radius:18px;background:#faf7f2;">
               <p style="margin:0 0 8px;"><strong>Motivo de consulta</strong></p>
               <p style="margin:0;line-height:1.7;">${reason}</p>
@@ -80,19 +80,19 @@ function buildMessages(payload: NotificationPayload): EmailMessage[] {
       },
       {
         to: payload.recipientEmail,
-        subject: "Hemos recibido tu solicitud de reserva",
+        subject: "Hemos recibido tu solicitud de cita",
         text: [
           `Hola ${payload.recipientName},`,
           "",
           `Hemos recibido tu solicitud para ${summary}.`,
-          "Lidia revisara la disponibilidad y te respondera en breve.",
+          "Lidia revisara la agenda y te respondera lo antes posible.",
         ].join("\n"),
         html: `
           <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1f1d1b;">
             <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#7b746f;">Lidia Castro Fisioterapia</p>
             <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Solicitud recibida</h1>
             <p style="font-size:16px;line-height:1.7;">Hola ${escapeHtml(payload.recipientName)}, hemos recibido tu solicitud para <strong>${escapeHtml(summary)}</strong>.</p>
-            <p style="font-size:16px;line-height:1.7;">Lidia revisara la agenda y te respondera lo antes posible por tu canal preferido.</p>
+            <p style="font-size:16px;line-height:1.7;">Lidia revisara la agenda y se pondra en contacto contigo para confirmar el siguiente paso.</p>
           </div>
         `,
       },
@@ -103,18 +103,19 @@ function buildMessages(payload: NotificationPayload): EmailMessage[] {
     return [
       {
         to: payload.recipientEmail,
-        subject: "Tu cita ha sido confirmada",
+        subject: "Tu cita ya esta confirmada",
         text: [
           `Hola ${payload.recipientName},`,
           "",
           `Tu cita para ${summary} ha quedado confirmada.`,
-          "Si necesitas moverla, responde a este email.",
+          "Si necesitas cambiarla, responde a este email.",
         ].join("\n"),
         html: `
           <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1f1d1b;">
             <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#7b746f;">Lidia Castro Fisioterapia</p>
-            <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Tu cita esta confirmada</h1>
+            <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Tu cita ya esta confirmada</h1>
             <p style="font-size:16px;line-height:1.7;">Hola ${escapeHtml(payload.recipientName)}, tu cita para <strong>${escapeHtml(summary)}</strong> ha quedado confirmada.</p>
+            <p style="font-size:16px;line-height:1.7;">Si necesitas cambiarla, puedes responder directamente a este email.</p>
           </div>
         `,
       },
@@ -124,19 +125,19 @@ function buildMessages(payload: NotificationPayload): EmailMessage[] {
   return [
     {
       to: payload.recipientEmail,
-      subject: "Necesitamos reprogramar tu solicitud",
+      subject: "Necesitamos ofrecerte otra franja",
       text: [
         `Hola ${payload.recipientName},`,
         "",
-        `Tu solicitud para ${summary} no ha podido confirmarse en ese hueco.`,
-        "Puedes responder a este email para proponer otra franja.",
+        `Tu solicitud para ${summary} no ha podido confirmarse en esa franja.`,
+        "Si te parece bien, responde a este email y buscamos otra hora que te encaje.",
       ].join("\n"),
       html: `
         <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1f1d1b;">
           <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#7b746f;">Lidia Castro Fisioterapia</p>
-          <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Necesitamos reprogramar</h1>
-          <p style="font-size:16px;line-height:1.7;">Hola ${escapeHtml(payload.recipientName)}, la solicitud para <strong>${escapeHtml(summary)}</strong> no ha podido confirmarse en ese hueco.</p>
-          <p style="font-size:16px;line-height:1.7;">Si quieres, responde a este email y buscamos otra franja que te encaje.</p>
+          <h1 style="font-size:28px;line-height:1.15;margin:0 0 16px;">Necesitamos ofrecerte otra franja</h1>
+          <p style="font-size:16px;line-height:1.7;">Hola ${escapeHtml(payload.recipientName)}, la solicitud para <strong>${escapeHtml(summary)}</strong> no ha podido confirmarse en esa franja.</p>
+          <p style="font-size:16px;line-height:1.7;">Si quieres, responde a este email y buscamos otra hora que te encaje mejor.</p>
         </div>
       `,
     },
@@ -172,7 +173,7 @@ Deno.serve(async (request) => {
 
   try {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const fromEmail = Deno.env.get("BOOKING_FROM_EMAIL") ?? "Lidia Castro Demo <onboarding@resend.dev>";
+    const fromEmail = Deno.env.get("BOOKING_FROM_EMAIL") ?? "Lidia Castro Fisioterapia <onboarding@resend.dev>";
 
     if (!resendApiKey) {
       return new Response(JSON.stringify({ error: "Missing RESEND_API_KEY" }), {

@@ -38,7 +38,7 @@
 
 @layer components {
   .btn-editorial {
-    @apply rounded-full bg-primary px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-surface transition-colors duration-300 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-8 sm:py-4;
+    @apply rounded-full bg-primary px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-surface transition-[background-color,transform,opacity] duration-300 hover:bg-accent active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-8 sm:py-4;
   }
 
   .vertical-label {
@@ -142,7 +142,7 @@
   }
 
   .app-input {
-    @apply w-full rounded-[1.25rem] border border-on-surface/10 bg-surface px-4 py-3 text-sm text-on-surface transition-colors duration-300 placeholder:text-on-surface/35 focus:border-accent focus:outline-none;
+    @apply w-full rounded-[1.25rem] border border-on-surface/10 bg-surface px-4 py-3 text-sm text-on-surface transition-colors duration-300 placeholder:text-on-surface/35 hover:border-on-surface/18 focus:border-accent focus:outline-none disabled:cursor-not-allowed disabled:bg-on-surface/[0.04] disabled:text-on-surface/50;
   }
 
   .safe-screen {

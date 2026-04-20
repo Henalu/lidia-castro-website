@@ -3,25 +3,129 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/auth-context";
-import { useSiteContentData } from "../../lib/hooks";
+import { useSiteContentData, useSiteSettingsData } from "../../lib/hooks";
 import { publicSections } from "../../lib/navigation";
 import { cn } from "../../lib/utils";
+
+function getSectionId(href: string) {
+  return href.split("#")[1] ?? "";
+}
+
+function getHeaderOffset() {
+  if (typeof window === "undefined") {
+    return 96;
+  }
+
+  const value = window.getComputedStyle(document.documentElement).getPropertyValue("--header-height");
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 96;
+}
+
+function getPhoneHref(phone: string) {
+  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+}
 
 export function PublicLayout() {
   const { profile, signOutAction } = useAuth();
   const { content } = useSiteContentData();
+  const { settings } = useSiteSettingsData();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const location = useLocation();
 
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname, location.hash]);
 
+  useEffect(() => {
+    if (!menuOpen || typeof document === "undefined") {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      if (event.matches) {
+        setMenuOpen(false);
+      }
+    };
+
+    handleChange(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname !== "/" || typeof window === "undefined") {
+      setActiveSection("");
+      return;
+    }
+
+    let frameId = 0;
+
+    const updateActiveSection = () => {
+      const threshold = window.scrollY + getHeaderOffset() + 32;
+      let nextActiveSection = "";
+
+      for (const item of publicSections) {
+        const sectionId = getSectionId(item.href);
+        const element = document.getElementById(sectionId);
+
+        if (element && element.offsetTop <= threshold) {
+          nextActiveSection = item.href;
+        }
+      }
+
+      setActiveSection(nextActiveSection);
+    };
+
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(updateActiveSection);
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, [location.pathname]);
+
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface" id="top">
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-on-surface/8 bg-surface/80 backdrop-blur-xl">
         <div className="container-shell flex min-h-[var(--header-height)] items-center justify-between gap-6 px-5 sm:px-6 md:px-10">
-          <Link to="/" aria-label="Inicio - Lidia Castro Fisioterapia" className="text-lg font-semibold uppercase tracking-[0.14em] sm:text-xl">
+          <Link to="/#top" aria-label="Inicio - Lidia Castro Fisioterapia" className="text-lg font-semibold uppercase tracking-[0.14em] sm:text-xl">
             Lidia Castro
             <span className="ml-2 align-top text-[10px] font-normal opacity-45">R</span>
           </Link>
@@ -33,8 +137,9 @@ export function PublicLayout() {
                 to={item.href}
                 className={cn(
                   "nav-link text-[11px] font-semibold uppercase tracking-[0.22em]",
-                  location.pathname === "/" && location.hash === item.href.replace("/", "") && "is-active",
+                  location.pathname === "/" && activeSection === item.href && "is-active",
                 )}
+                aria-current={location.pathname === "/" && activeSection === item.href ? "location" : undefined}
               >
                 {item.label}
               </Link>
@@ -98,7 +203,12 @@ export function PublicLayout() {
 
               <div className="flex-1 space-y-3 overflow-y-auto px-5 py-6">
                 {publicSections.map((item) => (
-                  <Link key={item.href} to={item.href} className="mobile-nav-link block">
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn("mobile-nav-link block", location.pathname === "/" && activeSection === item.href && "is-active")}
+                    aria-current={location.pathname === "/" && activeSection === item.href ? "location" : undefined}
+                  >
                     <p className="text-xl font-medium tracking-tight">{item.label}</p>
                     <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{item.description}</p>
                   </Link>
@@ -154,16 +264,20 @@ export function PublicLayout() {
 
           <div className="grid gap-6 self-end sm:grid-cols-2">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.26em] text-on-surface/38">Direccion</span>
-              <p className="font-headline text-2xl italic">Madrid</p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.26em] text-on-surface/38">Ubicacion</span>
+              <p className="font-headline text-2xl italic">Gijon, Asturias</p>
               <p className="text-sm leading-relaxed text-on-surface-variant">{content.contact.addressHint}</p>
             </div>
 
             <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.26em] text-on-surface/38">Presencia digital</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.26em] text-on-surface/38">Contacto directo</span>
               <div className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-[0.16em]">
-                <span className="text-on-surface/72">{content.contact.instagramLabel}</span>
-                <span className="text-on-surface/72">{content.contact.linkedinLabel}</span>
+                <a href={getPhoneHref(settings.contactPhone)} className="text-on-surface/72 transition-colors duration-300 hover:text-accent">
+                  {settings.contactPhone}
+                </a>
+                <Link to="/reservar" className="text-on-surface/72 transition-colors duration-300 hover:text-accent">
+                  Reservar online
+                </Link>
                 <Link to="/#top" className="text-accent transition-colors duration-300 hover:text-on-surface">
                   Volver arriba
                 </Link>

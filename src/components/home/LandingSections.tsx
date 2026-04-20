@@ -10,6 +10,10 @@ const iconMap = {
 };
 
 export function LandingSections({ content }: { content: SiteContent }) {
+  const [featuredService, ...secondaryServices] = content.services;
+  const [featuredTestimonial, ...secondaryTestimonials] = content.testimonials;
+  const FeaturedServiceIcon = featuredService ? iconMap[featuredService.icon] : null;
+
   return (
     <>
       <section className="hero-shell container-shell overflow-hidden px-5 pb-0 sm:px-6 md:px-10">
@@ -69,7 +73,7 @@ export function LandingSections({ content }: { content: SiteContent }) {
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             className="order-2 min-w-0 md:order-1"
           >
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] bg-on-surface/5 sm:aspect-[5/4] md:h-[34rem] md:aspect-auto md:rounded-[2.5rem] lg:h-[42rem]">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] bg-on-surface/5 sm:aspect-[5/4] md:h-[clamp(30rem,46vw,42rem)] md:aspect-auto md:rounded-[2.5rem]">
               <div className="frame-corner left-4 top-4 hidden border-l-2 border-t-2 sm:block" />
               <img src={content.hero.imageUrl} alt={content.hero.imageAlt} loading="eager" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </div>
@@ -94,28 +98,52 @@ export function LandingSections({ content }: { content: SiteContent }) {
               <img src={content.servicesIntro.imageUrl} alt={content.servicesIntro.imageAlt} loading="lazy" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </div>
 
-            <div className="grid gap-5 md:grid-cols-3">
-              {content.services.map((service) => {
-                const ServiceIcon = iconMap[service.icon];
-                return (
-                  <article
-                    key={service.title}
-                    className="flex h-full flex-col gap-6 rounded-[1.75rem] border border-on-surface/10 bg-surface-container/65 p-6 shadow-[0_18px_50px_rgba(26,26,26,0.04)] transition-transform duration-500 hover:-translate-y-1"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="serif-italic text-2xl text-on-surface/60">/{service.page}</span>
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full border border-on-surface/10 bg-surface">
-                        <ServiceIcon size={18} strokeWidth={1.5} />
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:items-start">
+              {featuredService ? (
+                <article className="flex h-full min-w-0 flex-col justify-between rounded-[2rem] border border-on-surface/10 bg-surface-container/72 p-6 shadow-[0_18px_50px_rgba(26,26,26,0.04)] md:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 space-y-3">
+                      <span className="eyebrow text-accent">Especialidad {featuredService.page}</span>
+                      <h3 className="font-headline text-[clamp(2.6rem,4vw,4rem)] leading-[0.92] tracking-tight">{featuredService.title}</h3>
+                    </div>
+                    {FeaturedServiceIcon ? (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-on-surface/10 bg-surface">
+                        <FeaturedServiceIcon size={20} strokeWidth={1.5} />
                       </div>
-                    </div>
-                    <div className="editorial-divider" />
-                    <div className="space-y-3">
-                      <h3 className="font-headline text-[1.9rem] leading-none tracking-tight">{service.title}</h3>
-                      <p className="text-sm leading-relaxed text-on-surface-variant">{service.description}</p>
-                    </div>
-                  </article>
-                );
-              })}
+                    ) : null}
+                  </div>
+
+                  <div className="mt-8 grid gap-6 border-t border-on-surface/8 pt-6 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.58fr)] md:items-end">
+                    <p className="max-w-2xl text-base leading-relaxed text-on-surface-variant sm:text-lg">{featuredService.description}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface/48">
+                      Valoracion precisa, tratamiento manual y seguimiento adaptado a tu evolucion.
+                    </p>
+                  </div>
+                </article>
+              ) : null}
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+                {secondaryServices.map((service) => {
+                  const ServiceIcon = iconMap[service.icon];
+                  return (
+                    <article
+                      key={service.title}
+                      className="flex h-full min-w-0 flex-col gap-5 rounded-[1.75rem] border border-on-surface/10 bg-surface p-6 transition-transform duration-500 hover:-translate-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="serif-italic text-2xl text-on-surface/55">/{service.page}</span>
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-on-surface/10 bg-surface-container/75">
+                          <ServiceIcon size={18} strokeWidth={1.5} />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <h3 className="font-headline text-[1.9rem] leading-none tracking-tight">{service.title}</h3>
+                        <p className="text-sm leading-relaxed text-on-surface-variant">{service.description}</p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -187,17 +215,37 @@ export function LandingSections({ content }: { content: SiteContent }) {
             <p className="max-w-md text-sm leading-relaxed text-on-surface-variant">{content.testimonialsIntro.description}</p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {content.testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="rounded-[1.75rem] border border-on-surface/10 p-6 md:p-7">
-                <p className="font-headline text-[1.45rem] italic leading-relaxed text-on-surface/82">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div className="editorial-divider my-6 max-w-14" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold uppercase tracking-[0.14em]">{testimonial.name}</p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-on-surface/45">{testimonial.service}</p>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            {featuredTestimonial ? (
+              <article className="flex h-full min-w-0 flex-col justify-between rounded-[2rem] border border-on-surface/10 bg-surface-container/45 p-6 md:p-8">
+                <div className="space-y-6">
+                  <span className="eyebrow text-accent">Historia destacada</span>
+                  <p className="font-headline text-[clamp(2rem,3.6vw,3.25rem)] italic leading-[1.15] text-on-surface/84">
+                    &ldquo;{featuredTestimonial.quote}&rdquo;
+                  </p>
+                </div>
+                <div className="mt-8 grid gap-3 border-t border-on-surface/10 pt-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold uppercase tracking-[0.14em]">{featuredTestimonial.name}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-on-surface/45">{featuredTestimonial.service}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface/38">Proceso acompanado</span>
                 </div>
               </article>
-            ))}
+            ) : null}
+
+            <div className="grid gap-5">
+              {secondaryTestimonials.map((testimonial) => (
+                <article key={testimonial.name} className="rounded-[1.75rem] border border-on-surface/10 bg-surface p-6 md:p-7">
+                  <p className="font-headline text-[1.45rem] italic leading-relaxed text-on-surface/82">&ldquo;{testimonial.quote}&rdquo;</p>
+                  <div className="editorial-divider my-6 max-w-14" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold uppercase tracking-[0.14em]">{testimonial.name}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-on-surface/45">{testimonial.service}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -235,17 +283,21 @@ export function LandingSections({ content }: { content: SiteContent }) {
         </div>
       </section>
 
-      <section className="section-shell bg-surface text-center">
-        <div className="container-shell max-w-3xl space-y-8">
-          <span className="eyebrow block">{content.finalCta.eyebrow}</span>
-          <h2 className="display-hero text-[clamp(3rem,11vw,6.8rem)] leading-[0.86]">
-            {content.finalCta.title}
-            <span className="serif-italic"> {content.finalCta.highlight}</span>
-          </h2>
-          <p className="mx-auto max-w-2xl text-base leading-relaxed text-on-surface-variant sm:text-lg">{content.finalCta.description}</p>
-          <Link to="/reservar" className="btn-editorial inline-flex items-center justify-center">
-            {content.finalCta.buttonLabel}
-          </Link>
+      <section className="section-shell bg-surface">
+        <div className="container-shell grid gap-8 border-t border-on-surface/10 pt-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:gap-12">
+          <div className="max-w-4xl space-y-6">
+            <span className="eyebrow block">{content.finalCta.eyebrow}</span>
+            <h2 className="display-hero max-w-4xl text-[clamp(3rem,11vw,6.8rem)] leading-[0.86]">
+              {content.finalCta.title}
+              <span className="serif-italic"> {content.finalCta.highlight}</span>
+            </h2>
+            <p className="max-w-2xl text-base leading-relaxed text-on-surface-variant sm:text-lg">{content.finalCta.description}</p>
+          </div>
+          <div className="md:justify-self-end">
+            <Link to="/reservar" className="btn-editorial inline-flex items-center justify-center">
+              {content.finalCta.buttonLabel}
+            </Link>
+          </div>
         </div>
       </section>
     </>

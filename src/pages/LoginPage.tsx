@@ -41,21 +41,41 @@ export function LoginPage() {
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <FormField label="Email" htmlFor="login-email">
-          <TextInput id="login-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="correo@ejemplo.com" />
+          <TextInput
+            id="login-email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="correo@ejemplo.com"
+            autoComplete="email"
+            maxLength={120}
+          />
         </FormField>
 
         <FormField label="Contrasena" htmlFor="login-password">
-          <TextInput id="login-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Tu contrasena" />
+          <TextInput
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Tu contrasena"
+            autoComplete="current-password"
+            maxLength={120}
+          />
         </FormField>
 
-        {error ? <div className="rounded-[1.25rem] bg-rose-100 px-4 py-3 text-sm text-rose-900">{error}</div> : null}
+        {error ? (
+          <div className="rounded-[1.25rem] bg-rose-100 px-4 py-3 text-sm text-rose-900" role="alert">
+            {error}
+          </div>
+        ) : null}
 
         <button type="submit" className="btn-editorial inline-flex w-full items-center justify-center" disabled={isSubmitting}>
           {isSubmitting ? "Entrando..." : "Entrar"}
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-on-surface-variant">
+      <p className="mt-6 text-sm leading-relaxed text-on-surface-variant">
         No tienes cuenta?{" "}
         <Link to="/registro" className="text-accent underline">
           Registrate aqui

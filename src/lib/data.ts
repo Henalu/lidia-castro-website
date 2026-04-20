@@ -101,7 +101,56 @@ function setLocalBlocks(blocks: CalendarBlock[]) {
 
 function getLocalContent(): SiteContent {
   initializeLocalDemo();
-  return readStorage(STORAGE_KEYS.siteContent, defaultSiteContent);
+  const storedContent = readStorage(STORAGE_KEYS.siteContent, defaultSiteContent);
+  let hasChanges = false;
+
+  const normalizedContent: SiteContent = {
+    ...storedContent,
+    hero: {
+      ...storedContent.hero,
+      eyebrow:
+        storedContent.hero.eyebrow === "Fisioterapia especializada en Madrid"
+          ? "Fisioterapia especializada en Gijon, Asturias"
+          : storedContent.hero.eyebrow,
+      principles: storedContent.hero.principles.map((principle) => {
+        if (principle === "Atencion personalizada en Madrid") {
+          hasChanges = true;
+          return "Atencion personalizada en Gijon, Asturias";
+        }
+
+        return principle;
+      }),
+    },
+    clinic: {
+      ...storedContent.clinic,
+      location: storedContent.clinic.location === "Madrid" ? "Gijon, Asturias" : storedContent.clinic.location,
+    },
+    contact: {
+      ...storedContent.contact,
+      addressHint:
+        storedContent.contact.addressHint === "Zona centro de Madrid. La direccion exacta se comparte al confirmar la cita."
+          ? "Gijon, Asturias. La direccion exacta se comparte al confirmar la cita."
+          : storedContent.contact.addressHint,
+    },
+  };
+
+  if (normalizedContent.hero.eyebrow !== storedContent.hero.eyebrow) {
+    hasChanges = true;
+  }
+
+  if (normalizedContent.clinic.location !== storedContent.clinic.location) {
+    hasChanges = true;
+  }
+
+  if (normalizedContent.contact.addressHint !== storedContent.contact.addressHint) {
+    hasChanges = true;
+  }
+
+  if (hasChanges) {
+    writeStorage(STORAGE_KEYS.siteContent, normalizedContent);
+  }
+
+  return normalizedContent;
 }
 
 function setLocalContent(content: SiteContent) {

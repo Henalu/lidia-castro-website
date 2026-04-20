@@ -59,22 +59,22 @@ export function RegisterPage() {
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <FormField label="Nombre y apellidos" htmlFor="register-name">
-          <TextInput id="register-name" value={form.fullName} onChange={(event) => updateField("fullName", event.target.value)} />
+          <TextInput id="register-name" value={form.fullName} onChange={(event) => updateField("fullName", event.target.value)} autoComplete="name" maxLength={120} />
         </FormField>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField label="Email" htmlFor="register-email">
-            <TextInput id="register-email" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
+            <TextInput id="register-email" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} autoComplete="email" maxLength={120} />
           </FormField>
 
           <FormField label="Telefono" htmlFor="register-phone">
-            <TextInput id="register-phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
+            <TextInput id="register-phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} autoComplete="tel" inputMode="tel" maxLength={25} />
           </FormField>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField label="Edad" htmlFor="register-age">
-            <TextInput id="register-age" type="number" min="0" value={form.age} onChange={(event) => updateField("age", event.target.value)} />
+            <TextInput id="register-age" type="number" min="0" max="120" value={form.age} onChange={(event) => updateField("age", event.target.value)} />
           </FormField>
 
           <FormField label="Sexo" htmlFor="register-sex">
@@ -98,18 +98,22 @@ export function RegisterPage() {
           </FormField>
         </div>
 
-        <FormField label="Contrasena" htmlFor="register-password">
-          <TextInput id="register-password" type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} />
+        <FormField label="Contrasena" htmlFor="register-password" hint="Utiliza una contrasena facil de recordar para ti y segura para el acceso.">
+          <TextInput id="register-password" type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} autoComplete="new-password" maxLength={120} />
         </FormField>
 
-        {error ? <div className="rounded-[1.25rem] bg-rose-100 px-4 py-3 text-sm text-rose-900">{error}</div> : null}
+        {error ? (
+          <div className="rounded-[1.25rem] bg-rose-100 px-4 py-3 text-sm text-rose-900" role="alert">
+            {error}
+          </div>
+        ) : null}
 
         <button type="submit" className="btn-editorial inline-flex w-full items-center justify-center" disabled={isSubmitting}>
           {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-on-surface-variant">
+      <p className="mt-6 text-sm leading-relaxed text-on-surface-variant">
         Ya tienes cuenta?{" "}
         <Link to="/login" className="text-accent underline">
           Inicia sesion

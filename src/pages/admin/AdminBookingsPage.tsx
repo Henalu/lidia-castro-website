@@ -16,6 +16,7 @@ export function AdminBookingsPage() {
     query: "",
   });
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ bookingId: string; status: BookingStatus } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,20 +42,26 @@ export function AdminBookingsPage() {
   const groupedBookings = useMemo(() => bookings, [bookings]);
 
   async function handleStatusChange(booking: BookingRequest, status: BookingStatus) {
-    if (!profile) {
+    if (!profile || booking.status === status || pendingAction?.bookingId === booking.id) {
       return;
     }
 
-    const contact = getBookingContact(booking, users);
-    const result = await updateBookingStatus(booking.id, status, profile.email, {
-      email: contact.email || profile.email,
-      name: contact.name,
-    });
+    setPendingAction({ bookingId: booking.id, status });
 
-    setBookings((currentValue) =>
-      currentValue.map((item) => (item.id === booking.id ? { ...item, status: result.booking.status, updatedAt: result.booking.updatedAt } : item)),
-    );
-    setFeedback(result.warning ?? `Reserva ${status === "confirmed" ? "confirmada" : "rechazada"} correctamente.`);
+    try {
+      const contact = getBookingContact(booking, users);
+      const result = await updateBookingStatus(booking.id, status, profile.email, {
+        email: contact.email || profile.email,
+        name: contact.name,
+      });
+
+      setBookings((currentValue) =>
+        currentValue.map((item) => (item.id === booking.id ? { ...item, status: result.booking.status, updatedAt: result.booking.updatedAt } : item)),
+      );
+      setFeedback(result.warning ?? `Reserva ${status === "confirmed" ? "confirmada" : "rechazada"} correctamente.`);
+    } finally {
+      setPendingAction(null);
+    }
   }
 
   return (
@@ -89,7 +96,11 @@ export function AdminBookingsPage() {
         </FormField>
       </div>
 
-      {feedback ? <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm">{feedback}</div> : null}
+      {feedback ? (
+        <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm" role="status">
+          {feedback}
+        </div>
+      ) : null}
 
       <div className="space-y-4">
         {groupedBookings.length ? (
@@ -130,17 +141,19 @@ export function AdminBookingsPage() {
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
-                      className="rounded-full border border-emerald-300 bg-emerald-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-900"
+                      className="rounded-full border border-emerald-300 bg-emerald-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-900 disabled:cursor-not-allowed disabled:opacity-45"
                       onClick={() => void handleStatusChange(booking, "confirmed")}
+                      disabled={booking.status === "confirmed" || pendingAction?.bookingId === booking.id}
                     >
-                      Confirmar
+                      {pendingAction?.bookingId === booking.id && pendingAction.status === "confirmed" ? "Actualizando..." : "Confirmar"}
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border border-rose-300 bg-rose-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-900"
+                      className="rounded-full border border-rose-300 bg-rose-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-900 disabled:cursor-not-allowed disabled:opacity-45"
                       onClick={() => void handleStatusChange(booking, "rejected")}
+                      disabled={booking.status === "rejected" || pendingAction?.bookingId === booking.id}
                     >
-                      Rechazar
+                      {pendingAction?.bookingId === booking.id && pendingAction.status === "rejected" ? "Actualizando..." : "Rechazar"}
                     </button>
                   </div>
                 </div>

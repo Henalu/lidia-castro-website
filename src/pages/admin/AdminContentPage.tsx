@@ -51,7 +51,7 @@ export function AdminContentPage() {
       <PageIntro
         eyebrow="Contenido web"
         title="Edicion por secciones"
-        description="Campos clave para actualizar textos e imagenes sin alterar la estructura general de la web."
+        description="Actualiza los textos e imagenes visibles en la web manteniendo la estructura, el tono y la jerarquia general."
       />
 
       <form className="space-y-6" onSubmit={handleSave}>
@@ -61,31 +61,31 @@ export function AdminContentPage() {
             <h2 className="font-headline text-3xl tracking-tight">Encabezado principal</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Eyebrow" htmlFor="hero-eyebrow">
+            <FormField label="Antetitulo" htmlFor="hero-eyebrow">
               <TextInput id="hero-eyebrow" value={draft.hero.eyebrow} onChange={(event) => updateDraft("hero", { ...draft.hero, eyebrow: event.target.value })} />
             </FormField>
-            <FormField label="Titulo" htmlFor="hero-title">
+            <FormField label="Inicio del titulo" htmlFor="hero-title">
               <TextInput id="hero-title" value={draft.hero.title} onChange={(event) => updateDraft("hero", { ...draft.hero, title: event.target.value })} />
             </FormField>
-            <FormField label="Highlight" htmlFor="hero-highlight">
+            <FormField label="Palabra destacada" htmlFor="hero-highlight">
               <TextInput id="hero-highlight" value={draft.hero.highlight} onChange={(event) => updateDraft("hero", { ...draft.hero, highlight: event.target.value })} />
             </FormField>
-            <FormField label="CTA principal" htmlFor="hero-cta">
+            <FormField label="Boton principal" htmlFor="hero-cta">
               <TextInput id="hero-cta" value={draft.hero.primaryCtaLabel} onChange={(event) => updateDraft("hero", { ...draft.hero, primaryCtaLabel: event.target.value })} />
             </FormField>
-            <FormField label="URL imagen" htmlFor="hero-image" hint="La imagen se actualiza mediante una URL externa.">
+            <FormField label="Imagen principal" htmlFor="hero-image" hint="Introduce la URL completa de la imagen que se mostrara en portada.">
               <TextInput id="hero-image" value={draft.hero.imageUrl} onChange={(event) => updateDraft("hero", { ...draft.hero, imageUrl: event.target.value })} />
             </FormField>
-            <FormField label="Imagen alt" htmlFor="hero-alt">
+            <FormField label="Descripcion accesible de imagen" htmlFor="hero-alt" hint="Explica brevemente que se ve en la foto.">
               <TextInput id="hero-alt" value={draft.hero.imageAlt} onChange={(event) => updateDraft("hero", { ...draft.hero, imageAlt: event.target.value })} />
             </FormField>
             <div className="md:col-span-2">
-              <FormField label="Descripcion" htmlFor="hero-description">
+              <FormField label="Texto principal" htmlFor="hero-description">
                 <Textarea id="hero-description" value={draft.hero.description} onChange={(event) => updateDraft("hero", { ...draft.hero, description: event.target.value })} />
               </FormField>
             </div>
             <div className="md:col-span-2">
-              <FormField label="Pildoras" htmlFor="hero-principles" hint="Una linea por item.">
+              <FormField label="Mensajes cortos" htmlFor="hero-principles" hint="Una linea por mensaje. Se muestran como pildoras en portada.">
                 <Textarea
                   id="hero-principles"
                   value={joinLines(draft.hero.principles)}
@@ -98,26 +98,26 @@ export function AdminContentPage() {
 
         <section className="rounded-[1.75rem] border border-on-surface/10 bg-surface-container/55 p-5 md:p-6">
           <div className="mb-5 space-y-2">
-            <p className="eyebrow">Servicios y sobre Lidia</p>
-            <h2 className="font-headline text-3xl tracking-tight">Bloques de marca</h2>
+            <p className="eyebrow">Servicios y perfil profesional</p>
+            <h2 className="font-headline text-3xl tracking-tight">Secciones de confianza</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
-              <FormField label="Intro servicios" htmlFor="services-title">
+              <FormField label="Titulo de servicios" htmlFor="services-title">
                 <TextInput
                   id="services-title"
                   value={draft.servicesIntro.title}
                   onChange={(event) => updateDraft("servicesIntro", { ...draft.servicesIntro, title: event.target.value })}
                 />
               </FormField>
-              <FormField label="Highlight servicios" htmlFor="services-highlight">
+              <FormField label="Palabra destacada de servicios" htmlFor="services-highlight">
                 <TextInput
                   id="services-highlight"
                   value={draft.servicesIntro.highlight}
                   onChange={(event) => updateDraft("servicesIntro", { ...draft.servicesIntro, highlight: event.target.value })}
                 />
               </FormField>
-              <FormField label="Descripcion servicios" htmlFor="services-description">
+              <FormField label="Texto de servicios" htmlFor="services-description">
                 <Textarea
                   id="services-description"
                   value={draft.servicesIntro.description}
@@ -130,10 +130,10 @@ export function AdminContentPage() {
               <FormField label="Titulo sobre Lidia" htmlFor="about-title">
                 <TextInput id="about-title" value={draft.about.title} onChange={(event) => updateDraft("about", { ...draft.about, title: event.target.value })} />
               </FormField>
-              <FormField label="Highlight sobre Lidia" htmlFor="about-highlight">
+              <FormField label="Apellido o palabra destacada" htmlFor="about-highlight">
                 <TextInput id="about-highlight" value={draft.about.highlight} onChange={(event) => updateDraft("about", { ...draft.about, highlight: event.target.value })} />
               </FormField>
-              <FormField label="Parrafos sobre Lidia" htmlFor="about-paragraphs" hint="Un parrafo por linea.">
+              <FormField label="Parrafos sobre Lidia" htmlFor="about-paragraphs" hint="Escribe un parrafo por linea para mantener una lectura clara.">
                 <Textarea
                   id="about-paragraphs"
                   value={joinLines(draft.about.paragraphs)}
@@ -146,22 +146,22 @@ export function AdminContentPage() {
 
         <section className="rounded-[1.75rem] border border-on-surface/10 bg-surface-container/55 p-5 md:p-6">
           <div className="mb-5 space-y-2">
-            <p className="eyebrow">Testimonios, clinica y contacto</p>
-            <h2 className="font-headline text-3xl tracking-tight">Cierre de la web</h2>
+            <p className="eyebrow">Testimonios, espacio y contacto</p>
+            <h2 className="font-headline text-3xl tracking-tight">Tramo final de la pagina</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
-              <FormField label="Titulo testimonios" htmlFor="testimonials-title">
+              <FormField label="Titulo de testimonios" htmlFor="testimonials-title">
                 <TextInput
                   id="testimonials-title"
                   value={draft.testimonialsIntro.title}
                   onChange={(event) => updateDraft("testimonialsIntro", { ...draft.testimonialsIntro, title: event.target.value })}
                 />
               </FormField>
-              <FormField label="Titulo clinica" htmlFor="clinic-title">
+              <FormField label="Titulo del espacio" htmlFor="clinic-title">
                 <TextInput id="clinic-title" value={draft.clinic.title} onChange={(event) => updateDraft("clinic", { ...draft.clinic, title: event.target.value })} />
               </FormField>
-              <FormField label="Descripcion clinica" htmlFor="clinic-description">
+              <FormField label="Texto del espacio" htmlFor="clinic-description">
                 <Textarea
                   id="clinic-description"
                   value={draft.clinic.description}
@@ -171,18 +171,25 @@ export function AdminContentPage() {
             </div>
 
             <div className="space-y-4">
-              <FormField label="Titulo contacto" htmlFor="contact-title">
+              <FormField label="Titular de contacto" htmlFor="contact-title">
                 <TextInput id="contact-title" value={draft.contact.title} onChange={(event) => updateDraft("contact", { ...draft.contact, title: event.target.value })} />
               </FormField>
-              <FormField label="Descripcion contacto" htmlFor="contact-description">
+              <FormField label="Texto de contacto" htmlFor="contact-description">
                 <Textarea
                   id="contact-description"
                   value={draft.contact.description}
                   onChange={(event) => updateDraft("contact", { ...draft.contact, description: event.target.value })}
                 />
               </FormField>
-              <FormField label="Email contacto" htmlFor="contact-email">
+              <FormField label="Email de contacto" htmlFor="contact-email">
                 <TextInput id="contact-email" value={draft.contact.email} onChange={(event) => updateDraft("contact", { ...draft.contact, email: event.target.value })} />
+              </FormField>
+              <FormField label="Ubicacion orientativa" htmlFor="contact-address" hint="Texto breve para indicar la zona o como se comparte la direccion.">
+                <TextInput
+                  id="contact-address"
+                  value={draft.contact.addressHint}
+                  onChange={(event) => updateDraft("contact", { ...draft.contact, addressHint: event.target.value })}
+                />
               </FormField>
             </div>
           </div>

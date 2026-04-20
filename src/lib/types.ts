@@ -152,8 +152,6 @@ export interface SiteContent {
     description: string;
     email: string;
     addressHint: string;
-    instagramLabel: string;
-    linkedinLabel: string;
   };
 }
 

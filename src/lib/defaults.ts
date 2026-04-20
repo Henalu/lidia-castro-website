@@ -4,11 +4,11 @@ const now = "2026-04-20T10:00:00.000Z";
 
 export const defaultSiteContent: SiteContent = {
   hero: {
-    eyebrow: "Fisioterapia especializada en Madrid",
+    eyebrow: "Fisioterapia especializada en Gijon, Asturias",
     title: "El arte de",
     highlight: "sanar",
     description:
-      "Un espacio de fisioterapia para aliviar el dolor, recuperar movimiento y entender que necesita tu cuerpo. Atencion cercana, criterio clinico y tratamiento personalizado desde la primera sesion.",
+      "Recupera movilidad, alivia el dolor y entiende mejor lo que necesita tu cuerpo. Valoracion clinica, tratamiento personalizado y una atencion cercana desde la primera cita.",
     primaryCtaLabel: "Reservar primera sesion",
     secondaryCtaLabel: "Ver especialidades",
     imageUrl:
@@ -17,15 +17,15 @@ export const defaultSiteContent: SiteContent = {
     principles: [
       "Valoracion individual",
       "Terapia manual y ejercicio terapeutico",
-      "Atencion personalizada en Madrid",
+      "Atencion personalizada en Gijon, Asturias",
     ],
   },
   servicesIntro: {
     eyebrow: "Filosofia y servicios",
-    title: "Fisioterapia adaptada",
-    highlight: "a ti",
+    title: "Tratamientos pensados",
+    highlight: "para tu caso",
     description:
-      "Cada tratamiento parte de una valoracion clara y de objetivos realistas. Menos soluciones genericas y mas trabajo ajustado a tu dolor, tu historia y tu momento.",
+      "Cada tratamiento parte de una valoracion clara, objetivos realistas y un plan que se ajusta a tu momento. Menos formulas cerradas y mas criterio clinico aplicado a ti.",
     imageUrl:
       "https://images.pexels.com/photos/20860606/pexels-photo-20860606.jpeg?cs=srgb&dl=pexels-funkcines-terapijos-centras-927573878-20860606.jpg&fm=jpg",
     imageAlt: "Fisioterapeuta trabajando terapia manual con una paciente",
@@ -35,27 +35,27 @@ export const defaultSiteContent: SiteContent = {
       page: "01",
       title: "Fisioterapia General",
       description:
-        "Valoracion completa y terapia manual para aliviar dolencias musculoesqueleticas agudas y cronicas. Un tratamiento pensado para ti, desde el primer momento.",
+        "Valoracion completa y tratamiento manual para dolor de espalda, cuello, articulaciones o sobrecarga. Un abordaje preciso para mejorar desde la primera sesion.",
       icon: "accessibility",
     },
     {
       page: "02",
       title: "Suelo Pelvico",
       description:
-        "Atencion especializada y discreta para la rehabilitacion del suelo pelvico. Cuidado integral de la salud femenina en todas sus etapas.",
+        "Atencion especializada para embarazo, postparto, dolor pelvico o disfunciones del suelo pelvico, con sensibilidad, claridad y acompanamiento real.",
       icon: "leaf",
     },
     {
       page: "03",
       title: "Recuperacion Funcional",
       description:
-        "Protocolos de ejercicio y reeducacion del movimiento para restaurar tu biomecanica optima y prevenir futuras lesiones.",
+        "Ejercicio terapeutico y reeducacion del movimiento para volver a moverte con seguridad, recuperar confianza y prevenir recaidas.",
       icon: "move",
     },
   ],
   methodologyIntro: {
     eyebrow: "Metodologia",
-    label: "NUESTRA METODOLOGIA",
+    label: "METODOLOGIA CLINICA",
   },
   methodologySteps: [
     {
@@ -63,21 +63,21 @@ export const defaultSiteContent: SiteContent = {
       tag: "Valoracion",
       title: "Escuchar antes de intervenir",
       description:
-        "Empezamos con una valoracion completa para entender tu historial, tus sintomas y que esta limitando hoy tu dia a dia. A partir de ahi definimos un plan con sentido para tu caso.",
+        "Empezamos con una valoracion completa para entender tu historia, tus sintomas y lo que hoy esta limitando tu dia a dia. A partir de ahi definimos un plan con sentido para tu caso.",
     },
     {
       number: "02",
       tag: "Tratamiento",
       title: "Terapia manual precisa",
       description:
-        "Cada tecnica se elige segun lo que necesitas en ese momento. El objetivo es aliviar el dolor, mejorar la movilidad y ayudarte a recuperar seguridad en el movimiento.",
+        "Cada tecnica se elige en funcion de lo que necesitas en ese momento. El objetivo es aliviar el dolor, mejorar la movilidad y devolverte seguridad al moverte.",
     },
     {
       number: "03",
       tag: "Movimiento",
       title: "Recuperacion que perdura",
       description:
-        "La sesion no termina en la camilla. Te guiamos con ejercicio terapeutico y pautas claras para consolidar la mejoria y prevenir recaidas.",
+        "La sesion no termina en la camilla. Te guiamos con ejercicio terapeutico y pautas claras para consolidar la mejoria y reducir el riesgo de recaida.",
     },
   ],
   about: {
@@ -86,7 +86,7 @@ export const defaultSiteContent: SiteContent = {
     highlight: "Rodriguez",
     paragraphs: [
       "Mi forma de trabajar parte de una idea sencilla: cada persona necesita una valoracion seria, un tratamiento bien explicado y un espacio donde sentirse atendida de verdad.",
-      "Con experiencia en fisioterapia musculoesqueletica y recuperacion funcional, mi enfoque combina terapia manual, ejercicio terapeutico y seguimiento cercano para adaptar cada sesion a la evolucion de tu caso.",
+      "Con experiencia en fisioterapia musculoesqueletica y recuperacion funcional, combino terapia manual, ejercicio terapeutico y seguimiento cercano para adaptar cada sesion a la evolucion real de tu caso.",
     ],
     badges: [
       "Valoracion individual",
@@ -94,15 +94,15 @@ export const defaultSiteContent: SiteContent = {
       "Seguimiento cercano",
       "Enfoque personalizado",
     ],
-    note: "Un enfoque centrado en explicar bien cada proceso, adaptar el tratamiento y acompanar la evolucion de cada persona con cercania y criterio clinico.",
+    note: "Trabajo desde una idea clara: que entiendas que estamos tratando, por que lo hacemos y como vamos a acompanar tu evolucion en cada fase.",
     imageUrl:
       "https://images.pexels.com/photos/35260720/pexels-photo-35260720.jpeg?cs=srgb&dl=pexels-8pcarlos-morocho-2150734957-35260720.jpg&fm=jpg",
     imageAlt: "Retrato profesional femenino en una clinica moderna",
   },
   testimonialsIntro: {
     eyebrow: "Pacientes",
-    title: "Opiniones que transmiten confianza",
-    description: "Experiencias que reflejan una atencion cercana, profesional y orientada a resultados reales.",
+    title: "Confianza que se nota en el proceso",
+    description: "Relatos que hablan de escucha, precision y una recuperacion acompanada de principio a fin.",
   },
   testimonials: [
     {
@@ -126,33 +126,31 @@ export const defaultSiteContent: SiteContent = {
   ],
   clinic: {
     eyebrow: "El espacio",
-    title: "Una consulta pensada para tratar con calma y precision",
+    title: "Una consulta pensada para tratar con tiempo y atencion",
     conceptLabel: "Concepto",
-    conceptValue: "Calma, luz y privacidad",
+    conceptValue: "Luz, calma y privacidad",
     description:
-      "Un entorno cuidado para que la sesion sea comoda, tranquila y centrada en tu tratamiento desde que entras por la puerta.",
-    location: "Madrid",
+      "Un espacio sereno, luminoso y discreto para que cada sesion transcurra con foco, sin prisas y con toda la atencion puesta en tu caso.",
+    location: "Gijon, Asturias",
     imageUrl:
       "https://images.pexels.com/photos/5619453/pexels-photo-5619453.jpeg?cs=srgb&dl=pexels-nicobecker-5619453.jpg&fm=jpg",
     imageAlt: "Interior luminoso de una clinica de tratamiento",
   },
   finalCta: {
     eyebrow: "Reserva",
-    title: "Da el primer paso",
-    highlight: "con confianza",
+    title: "Reserva tu primera valoracion",
+    highlight: "con tranquilidad",
     description:
-      "Si quieres valorar tu caso, elige dia y hora y envia tu solicitud. A partir de ahi, Lidia podra revisar la agenda y responderte personalmente.",
+      "Elige el dia, selecciona la hora que mejor te encaje y cuenta brevemente que necesitas. Lidia revisara tu solicitud y te respondera personalmente.",
     buttonLabel: "Solicitar cita",
   },
   contact: {
     eyebrow: "Contacto",
-    title: "Hablemos sobre tu caso.",
+    title: "Resuelve tus dudas o pide tu cita.",
     description:
-      "Si prefieres escribir antes de reservar, aqui tienes un punto de contacto claro para resolver dudas y valorar el siguiente paso.",
+      "Si prefieres escribir antes de reservar, puedes contar brevemente tu caso y recibir orientacion sobre el siguiente paso.",
     email: "info@lidiacastro.es",
-    addressHint: "Pendiente de confirmar con la clinica.",
-    instagramLabel: "Instagram",
-    linkedinLabel: "LinkedIn",
+    addressHint: "Gijon, Asturias. La direccion exacta se comparte al confirmar la cita.",
   },
 };
 

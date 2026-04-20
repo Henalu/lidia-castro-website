@@ -108,7 +108,7 @@ export function AccountPage() {
 
             <div className="space-y-4">
               <FormField label="Nombre y apellidos" htmlFor="account-name">
-                <TextInput id="account-name" value={form.fullName} onChange={(event) => updateField("fullName", event.target.value)} />
+                <TextInput id="account-name" value={form.fullName} onChange={(event) => updateField("fullName", event.target.value)} autoComplete="name" maxLength={120} />
               </FormField>
 
               <FormField label="Email" htmlFor="account-email" hint="El email esta vinculado al acceso de tu cuenta y no se edita desde esta pantalla.">
@@ -117,11 +117,11 @@ export function AccountPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField label="Telefono" htmlFor="account-phone">
-                  <TextInput id="account-phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
+                  <TextInput id="account-phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} autoComplete="tel" inputMode="tel" maxLength={25} />
                 </FormField>
 
                 <FormField label="Edad" htmlFor="account-age">
-                  <TextInput id="account-age" type="number" min="0" value={form.age} onChange={(event) => updateField("age", event.target.value)} />
+                  <TextInput id="account-age" type="number" min="0" max="120" value={form.age} onChange={(event) => updateField("age", event.target.value)} />
                 </FormField>
               </div>
 
@@ -143,13 +143,21 @@ export function AccountPage() {
                 </FormField>
               </div>
 
-              <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm text-on-surface-variant">
+              <div
+                className={`rounded-[1.25rem] px-4 py-3 text-sm ${
+                  profile.canBookDirect ? "bg-emerald-50 text-emerald-950" : "bg-on-surface/6 text-on-surface-variant"
+                }`}
+              >
                 {profile.canBookDirect
                   ? "Tu cuenta tiene permiso de reserva directa. Las nuevas reservas pueden quedar confirmadas automaticamente."
                   : "Tus reservas se enviaran como solicitud para que Lidia pueda revisarlas y confirmarlas."}
               </div>
 
-              {feedback ? <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm">{feedback}</div> : null}
+              {feedback ? (
+                <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm" role="status">
+                  {feedback}
+                </div>
+              ) : null}
 
               <button type="submit" className="btn-editorial inline-flex w-full items-center justify-center" disabled={isSaving}>
                 {isSaving ? "Guardando..." : "Guardar cambios"}

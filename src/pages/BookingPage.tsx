@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Circle, CircleDot, Minus, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormField, Select, TextInput, Textarea } from "../components/shared/FormField";
 import { useAuth } from "../context/auth-context";
@@ -54,6 +54,51 @@ function formatMonthLabel(date: Date) {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+function getCalendarDayStatusLabel(day: CalendarDay) {
+  switch (day.state) {
+    case "available":
+      return day.availableSlots === 1 ? "Disponible. Queda 1 hueco." : `Disponible. ${day.availableSlots} huecos libres.`;
+    case "limited":
+      return day.availableSlots === 1 ? "Disponibilidad limitada. Queda 1 hueco." : `Disponibilidad limitada. Quedan ${day.availableSlots} huecos.`;
+    case "full":
+      return "Completo.";
+    case "blocked":
+      return "Bloqueado por la clinica.";
+    case "closed":
+      return "Dia no laborable.";
+    case "past":
+      return "Fecha pasada.";
+    case "outside":
+      return "Fuera del mes actual.";
+  }
+}
+
+function getCalendarDayAriaLabel(day: CalendarDay, isSelected: boolean) {
+  const selectionLabel = isSelected ? " Fecha seleccionada." : "";
+  return `${formatLongDate(day.iso)}. ${getCalendarDayStatusLabel(day)}${selectionLabel}`;
+}
+
+function CalendarDayMarker({ day, isSelected }: { day: CalendarDay; isSelected: boolean }) {
+  switch (day.state) {
+    case "available":
+      return (
+        <Circle
+          aria-hidden="true"
+          className={`h-3.5 w-3.5 ${isSelected ? "fill-surface text-surface" : "fill-emerald-500 text-emerald-500"}`}
+          strokeWidth={1.8}
+        />
+      );
+    case "limited":
+      return <CircleDot aria-hidden="true" className={`h-3.5 w-3.5 ${isSelected ? "text-surface" : "text-amber-600"}`} strokeWidth={1.9} />;
+    case "full":
+      return <Minus aria-hidden="true" className={`h-3.5 w-3.5 ${isSelected ? "text-surface" : "text-on-surface/60"}`} strokeWidth={2.4} />;
+    case "blocked":
+      return <X aria-hidden="true" className={`h-3.5 w-3.5 ${isSelected ? "text-surface" : "text-rose-500"}`} strokeWidth={2.1} />;
+    default:
+      return null;
+  }
 }
 
 function getCalendarDayState(
@@ -131,9 +176,12 @@ export function BookingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackTone, setFeedbackTone] = useState<"success" | "error">("success");
   const [warning, setWarning] = useState<string | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<BookingFormInput>(emptyForm);
+  const [availabilityReloadKey, setAvailabilityReloadKey] = useState(0);
   const todayIso = useMemo(() => {
     const today = new Date();
     today.setHours(12, 0, 0, 0);
@@ -163,6 +211,11 @@ export function BookingPage() {
         if (!cancelled) {
           setBookings(availability.bookings);
           setBlocks(availability.blocks);
+          setAvailabilityError(null);
+        }
+      } catch {
+        if (!cancelled) {
+          setAvailabilityError("No hemos podido comprobar la disponibilidad ahora mismo. Puedes volver a intentarlo en unos segundos.");
         }
       } finally {
         if (!cancelled) {
@@ -176,7 +229,7 @@ export function BookingPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [availabilityReloadKey]);
 
   useEffect(() => {
     setForm((currentValue) => ({
@@ -252,26 +305,36 @@ export function BookingPage() {
     setErrors((currentValue) => ({ ...currentValue, selectedDate: "", selectedTime: "" }));
   }
 
-  function validateForm() {
+  const availabilityUnavailable = Boolean(availabilityError);
+
+  function validateForm(input: BookingFormInput) {
     const nextErrors: Record<string, string> = {};
 
-    if (!form.selectedDate) {
+    if (!input.selectedDate) {
       nextErrors.selectedDate = "Selecciona un dia.";
     }
-    if (!form.selectedTime) {
+    if (!input.selectedTime) {
       nextErrors.selectedTime = "Selecciona una hora.";
     }
-    if (!form.fullName.trim()) {
+    if (!input.fullName) {
       nextErrors.fullName = "Introduce tu nombre y apellidos.";
+    } else if (input.fullName.length < 3) {
+      nextErrors.fullName = "Introduce un nombre y apellidos validos.";
     }
-    if (!form.email.trim()) {
+    if (!input.email) {
       nextErrors.email = "Introduce tu email.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) {
+      nextErrors.email = "Introduce un email valido.";
     }
-    if (!form.phone.trim()) {
+    if (!input.phone) {
       nextErrors.phone = "Introduce tu telefono.";
+    } else if (input.phone.replace(/\D/g, "").length < 9) {
+      nextErrors.phone = "Introduce un telefono valido.";
     }
-    if (!form.reason.trim()) {
+    if (!input.reason) {
       nextErrors.reason = "Cuentanos brevemente tu motivo de consulta.";
+    } else if (input.reason.length < 10) {
+      nextErrors.reason = "Anade un poco mas de contexto para poder valorar tu caso.";
     }
 
     setErrors(nextErrors);
@@ -282,15 +345,31 @@ export function BookingPage() {
     event.preventDefault();
     setFeedback(null);
     setWarning(null);
+    setFeedbackTone("success");
 
-    if (!validateForm()) {
+    const normalizedForm: BookingFormInput = {
+      ...form,
+      fullName: form.fullName.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim(),
+      reason: form.reason.trim(),
+    };
+
+    if (availabilityUnavailable) {
+      setFeedbackTone("error");
+      setFeedback("No es posible enviar la solicitud hasta recuperar la disponibilidad. Vuelve a intentarlo.");
+      return;
+    }
+
+    if (!validateForm(normalizedForm)) {
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await createBooking(form, profile, settings);
+      const result = await createBooking(normalizedForm, profile, settings);
       setBookings((currentValue) => [result.booking, ...currentValue]);
+      setFeedbackTone("success");
       setFeedback(
         result.booking.status === "confirmed"
           ? "Tu cita ha quedado registrada y confirmada."
@@ -306,6 +385,7 @@ export function BookingPage() {
         selectedDate: currentValue.selectedDate,
       }));
     } catch (error) {
+      setFeedbackTone("error");
       setFeedback(error instanceof Error ? error.message : "No se ha podido enviar la solicitud.");
     } finally {
       setIsSubmitting(false);
@@ -324,7 +404,7 @@ export function BookingPage() {
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-on-surface/10 bg-surface-container/55 p-5 sm:p-6">
+          <div className="rounded-[2rem] border border-on-surface/10 bg-surface-container/55 p-5 sm:p-6" aria-busy={isLoading || settingsLoading}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-on-surface/8 pb-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-on-surface/50">Agenda disponible</p>
@@ -376,6 +456,25 @@ export function BookingPage() {
                     <p className="text-xs text-on-surface-variant">Horario base: {settings.workStart} - {settings.workEnd}</p>
                   </div>
 
+                  {availabilityError ? (
+                    <div className="mb-4 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900" role="alert">
+                      <p>{availabilityError}</p>
+                      <button
+                        type="button"
+                        className="mt-3 inline-flex items-center rounded-full border border-rose-200 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors hover:border-rose-300"
+                        onClick={() => setAvailabilityReloadKey((currentValue) => currentValue + 1)}
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {!availabilityError && (isLoading || settingsLoading) ? (
+                    <div className="mb-4 rounded-[1.25rem] border border-on-surface/8 bg-on-surface/[0.03] px-4 py-3 text-sm text-on-surface-variant" role="status">
+                      Comprobando disponibilidad...
+                    </div>
+                  ) : null}
+
                   <div className="grid grid-cols-7 gap-2">
                     {weekdayLabels.map((weekday) => (
                       <div key={weekday} className="pb-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-on-surface/40">
@@ -388,36 +487,32 @@ export function BookingPage() {
                       const stateStyles: Record<CalendarDayState, string> = {
                         available: "border-on-surface/10 bg-surface text-on-surface hover:border-accent/45",
                         limited: "border-accent/20 bg-accent/7 text-on-surface hover:border-accent/45",
-                        full: "border-on-surface/8 bg-on-surface/[0.03] text-on-surface/35",
-                        blocked: "border-on-surface/8 bg-on-surface/[0.04] text-on-surface/35",
-                        closed: "border-transparent bg-transparent text-on-surface/20",
-                        past: "border-transparent bg-transparent text-on-surface/18",
-                        outside: "border-transparent bg-transparent text-on-surface/12",
-                      };
-                      const markerStyles: Record<Exclude<CalendarDayState, "closed" | "past" | "outside">, string> = {
-                        available: "bg-emerald-500",
-                        limited: "bg-amber-500",
-                        full: "bg-on-surface/20",
-                        blocked: "bg-rose-400",
+                        full: "border-on-surface/8 bg-on-surface/[0.035] text-on-surface/58",
+                        blocked: "border-rose-200 bg-rose-50/80 text-on-surface/70",
+                        closed: "border-transparent bg-transparent text-on-surface/42",
+                        past: "border-transparent bg-transparent text-on-surface/42",
+                        outside: "border-transparent bg-transparent text-on-surface/28",
                       };
 
                       return (
                         <button
                           key={day.iso}
                           type="button"
-                          disabled={day.isDisabled || settingsLoading || isLoading}
+                          disabled={day.isDisabled || settingsLoading || isLoading || availabilityUnavailable}
                           className={`relative min-h-16 rounded-[1.1rem] border p-2 text-left transition-colors sm:min-h-[4.75rem] ${
                             isSelected ? "border-on-surface bg-on-surface text-surface" : stateStyles[day.state]
                           } ${day.isDisabled ? "cursor-not-allowed" : ""}`}
                           onClick={() => selectDate(day.iso)}
                           aria-pressed={isSelected}
+                          aria-label={getCalendarDayAriaLabel(day, isSelected)}
+                          title={getCalendarDayStatusLabel(day)}
                         >
                           <span className="block text-sm font-semibold">{day.dayNumber}</span>
-                          {day.state === "available" || day.state === "limited" ? (
-                            <span className={`mt-3 inline-flex h-2.5 w-2.5 rounded-full ${isSelected ? "bg-surface" : markerStyles[day.state]}`} />
-                          ) : null}
-                          {day.state === "full" || day.state === "blocked" ? (
-                            <span className={`mt-3 inline-flex h-2.5 w-2.5 rounded-full ${isSelected ? "bg-surface" : markerStyles[day.state]}`} />
+                          <span className="sr-only">{getCalendarDayStatusLabel(day)}</span>
+                          {day.state !== "closed" && day.state !== "past" && day.state !== "outside" ? (
+                            <span className="mt-3 inline-flex items-center justify-start">
+                              <CalendarDayMarker day={day} isSelected={isSelected} />
+                            </span>
                           ) : null}
                         </button>
                       );
@@ -426,19 +521,19 @@ export function BookingPage() {
 
                   <div className="mt-4 flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.16em] text-on-surface/48">
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                      <Circle aria-hidden="true" className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" strokeWidth={1.8} />
                       Disponible
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                      <CircleDot aria-hidden="true" className="h-3.5 w-3.5 text-amber-600" strokeWidth={1.9} />
                       Quedan huecos
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-on-surface/20" />
+                      <Minus aria-hidden="true" className="h-3.5 w-3.5 text-on-surface/60" strokeWidth={2.4} />
                       Completo
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                      <X aria-hidden="true" className="h-3.5 w-3.5 text-rose-500" strokeWidth={2.1} />
                       Bloqueado
                     </span>
                   </div>
@@ -459,13 +554,16 @@ export function BookingPage() {
                       <button
                         key={slot}
                         type="button"
-                        disabled={slotState !== "available" || settingsLoading || isLoading}
+                        disabled={slotState !== "available" || settingsLoading || isLoading || availabilityUnavailable}
                         className={`rounded-[1.25rem] border px-4 py-3 text-left text-sm transition-colors ${
                           form.selectedTime === slot
                             ? "border-on-surface bg-on-surface text-surface"
                             : "border-on-surface/10 bg-surface"
                         } ${slotState !== "available" ? "cursor-not-allowed opacity-45" : "hover:border-on-surface/25"}`}
                         onClick={() => updateField("selectedTime", slot)}
+                        aria-label={`${slot}. ${
+                          slotState === "available" ? "Disponible" : slotState === "reserved" ? "Reservada" : "Bloqueada"
+                        }.`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <span className="font-semibold">{slot}</span>
@@ -501,6 +599,8 @@ export function BookingPage() {
                 value={form.fullName}
                 onChange={(event) => updateField("fullName", event.target.value)}
                 placeholder="Nombre y apellidos"
+                autoComplete="name"
+                maxLength={120}
               />
             </FormField>
 
@@ -512,6 +612,8 @@ export function BookingPage() {
                   value={form.email}
                   onChange={(event) => updateField("email", event.target.value)}
                   placeholder="correo@ejemplo.com"
+                  autoComplete="email"
+                  maxLength={120}
                 />
               </FormField>
 
@@ -521,6 +623,9 @@ export function BookingPage() {
                   value={form.phone}
                   onChange={(event) => updateField("phone", event.target.value)}
                   placeholder="+34 600 000 000"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  maxLength={25}
                 />
               </FormField>
             </div>
@@ -548,13 +653,31 @@ export function BookingPage() {
                 value={form.reason}
                 onChange={(event) => updateField("reason", event.target.value)}
                 placeholder="Describe tu problema, molestias actuales o el motivo por el que quieres reservar."
+                maxLength={600}
               />
             </FormField>
 
-            {feedback ? <div className="rounded-[1.25rem] bg-on-surface/6 px-4 py-3 text-sm">{feedback}</div> : null}
-            {warning ? <div className="rounded-[1.25rem] bg-amber-100 px-4 py-3 text-sm text-amber-900">{warning}</div> : null}
+            {feedback ? (
+              <div
+                className={`rounded-[1.25rem] px-4 py-3 text-sm ${
+                  feedbackTone === "error" ? "border border-rose-200 bg-rose-50 text-rose-900" : "bg-on-surface/6"
+                }`}
+                role={feedbackTone === "error" ? "alert" : "status"}
+              >
+                {feedback}
+              </div>
+            ) : null}
+            {warning ? (
+              <div className="rounded-[1.25rem] bg-amber-100 px-4 py-3 text-sm text-amber-900" role="status">
+                {warning}
+              </div>
+            ) : null}
 
-            <button type="submit" className="btn-editorial inline-flex w-full items-center justify-center" disabled={isSubmitting || isLoading || settingsLoading}>
+            <button
+              type="submit"
+              className="btn-editorial inline-flex w-full items-center justify-center"
+              disabled={isSubmitting || isLoading || settingsLoading || availabilityUnavailable}
+            >
               {isSubmitting ? "Enviando..." : "Enviar solicitud"}
             </button>
 
